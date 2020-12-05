@@ -1,0 +1,11 @@
+python3 train.py --gpuid 8 \
+                 --epochs 150 \
+                 --batch_size 3 \
+                 --print_freq 200 \
+                 --lr_rate 0.01 \
+                 --gamma 0.7 \
+                 --save_dir ./train/sgd_pretrain \
+                 --save_every 1 \
+                 --reset True \
+                 --logger_name sgd \ 
+                 --log_file_name train.log
