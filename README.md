@@ -71,9 +71,14 @@ Argument
  - `--epochs` the path to store the checkpoints and config setting
  - `--batch_size` the batch size
  - `--print_freq` the frequence of print batch metric
+ - `--lr_rate` the initial learning rate
+ - `--gamma` the gamma in scheduler
  - `--save_dir` the directory to store checkpoints
  - `--save_every` the period of save checkpoints
+ - `--reset` set to delete save_dir and create a new one
  - `--log_file_name` the name of log file
+ - `--step_size` the learning rate step decay
+ - `--split_val` the number of training data split into validation set
 
 ## Inference
 Test in PyTorch. (The root is in pytorch_maskrcnn)
@@ -87,3 +92,6 @@ Argument
  - `--checkpoint` the path of load checkpoint model
  - `--outjson` the name of the result json file
  - `--save_dir` the directory to store args.txt
+ - `--reset` set to delete save_dir and create a new one
+ - `--log_file_name` the name of log file
+ - `--mask_threshold` the mask threshold

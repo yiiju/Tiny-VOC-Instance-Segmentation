@@ -3,6 +3,7 @@ import torch.nn as nn
 import torchvision
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
+from torchvision import transforms
 import torch.distributed as dist
 
 import os
@@ -24,6 +25,10 @@ def get_transform(train):
     transforms.append(T.ToTensor())
     if train:
         transforms.append(T.RandomHorizontalFlip(0.5))
+
+    if args.norm:
+        transforms.append(T.Normalize(mean=[0.485, 0.456, 0.406],
+                                    std=[0.229, 0.224, 0.225]))
     return T.Compose(transforms)
 
 
@@ -73,8 +78,13 @@ if __name__ == "__main__":
 
     # split the dataset in train and test set
     indices = torch.randperm(len(dataset)).tolist()
-    dataset = torch.utils.data.Subset(dataset, indices[:-50])
-    dataset_test = torch.utils.data.Subset(dataset_test, indices[-50:])
+    if args.split_val:
+        dataset = torch.utils.data.Subset(dataset, indices[:-args.split_val])
+        dataset_test = torch.utils.data.Subset(dataset_test,
+                                               indices[-args.split_val:])
+    else:
+        dataset = torch.utils.data.Subset(dataset, indices[:])
+        dataset_test = torch.utils.data.Subset(dataset_test, indices[:])
 
     # define training and validation data loaders
     data_loader = torch.utils.data.DataLoader(
@@ -88,23 +98,19 @@ if __name__ == "__main__":
     # 0 is background
     num_classes = 21
     model = get_model_instance_segmentation(num_classes)
+    if args.checkpoint:
+        model.load_state_dict(torch.load(args.checkpoint))
     model.to(device)
 
     # construct an optimizer
-    print(model)
     for p in model.parameters():
         p.requires_grad = True
     params = [p for p in model.parameters() if p.requires_grad]
     optimizer = torch.optim.SGD(params, lr=args.lr_rate,
                                 momentum=0.9, weight_decay=0.0005)
     lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer,
-                                                   step_size=20,
+                                                   step_size=args.step_size,
                                                    gamma=args.gamma)
-    # optimizer = torch.optim.Adam(params, lr=args.lr_rate, betas=(0.9, 0.999),
-    #                              eps=args.eps)
-    # lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer,
-    #                                                step_size=args.decay,
-    #                                                gamma=args.gamma)
 
     num_epochs = args.epochs
 
@@ -117,8 +123,6 @@ if __name__ == "__main__":
         _logger.info(log)
         # update the learning rate
         lr_scheduler.step()
-
-        # cleanup()
 
         # evaluate on the test dataset
         coco_evaluator = evaluate(model, data_loader_test, device=device)

@@ -18,15 +18,21 @@ import detection.transforms as T
 import detection.utils as utils
 
 from tinyDataset import TinyDataset
+from utils import mkExpDir
 from options import args
 
 
 def get_transform():
-    transform = transforms.Compose([
-        transforms.ToTensor(),
-        # transforms.Normalize(mean=[0.5, 0.5, 0.5],
-        #                      std=[0.5, 0.5, 0.5]),
-    ])
+    if args.norm:
+        transform = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                std=[0.229, 0.224, 0.225])
+        ])
+    else:
+        transform = transforms.Compose([
+            transforms.ToTensor(),
+        ])
     return transform
 
 
@@ -52,6 +58,8 @@ def get_model_instance_segmentation(num_classes):
 
 
 if __name__ == "__main__":
+    _logger = mkExpDir(args)
+
     # train on the GPU or on the CPU, if a GPU is not available
     gpuid = str(args.gpuid)
     if isinstance(args.gpuid, list):
@@ -70,7 +78,7 @@ if __name__ == "__main__":
 
     model.load_state_dict(torch.load(args.checkpoint))
     model.to(device)
-    dataset = TinyDataset('../data', get_transform(), mode="test")
+    dataset = TinyDataset('../', get_transform(), mode="test")
     testLoader = torch.utils.data.DataLoader(
                     dataset, batch_size=args.batch_size,
                     shuffle=False, num_workers=4,
@@ -98,7 +106,7 @@ if __name__ == "__main__":
                 labels = prediction["labels"]
                 masks = prediction["masks"]
 
-                masks = masks > 0.5
+                masks = masks > args.mask_threshold
 
                 scores = prediction["scores"].tolist()
                 labels = prediction["labels"].tolist()
@@ -123,6 +131,6 @@ if __name__ == "__main__":
                     ]
                 )
 
-    out_file = os.path.join(args.save_dir, 'save_results', args.outjson)
+    out_file = os.path.join(args.save_dir, args.outjson)
     with open(out_file, 'w') as json_file:
         json.dump(coco_results, json_file)

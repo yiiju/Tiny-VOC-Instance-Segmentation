@@ -1,11 +1,14 @@
 python3 train.py --gpuid 8 \
-                 --epochs 150 \
+                 --epochs 100 \
                  --batch_size 3 \
                  --print_freq 200 \
-                 --lr_rate 0.01 \
+                 --lr_rate 0.005 \
                  --gamma 0.7 \
-                 --save_dir ./train/sgd_pretrain \
+                 --save_dir ./train/sgd_pretrain_val20_aug2 \
                  --save_every 1 \
                  --reset True \
-                 --logger_name sgd \ 
-                 --log_file_name train.log
+                 --logger_name sgd \
+                 --log_file_name train.log \
+                 --step_size 10 \
+                 --split_val 20 \
+                 --norm True

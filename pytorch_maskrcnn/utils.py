@@ -51,13 +51,9 @@ def mkExpDir(args):
             shutil.rmtree(args.save_dir)
 
     os.makedirs(args.save_dir)
-    # os.makedirs(os.path.join(args.save_dir, 'img'))
 
     if (not args.test):
         os.makedirs(os.path.join(args.save_dir, 'model'))
-
-    if args.test:
-        os.makedirs(os.path.join(args.save_dir, 'save_results'))
 
     args_file = open(os.path.join(args.save_dir, 'args.txt'), 'w')
     for k, v in vars(args).items():

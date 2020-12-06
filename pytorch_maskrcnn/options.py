@@ -23,6 +23,10 @@ parser.add_argument('--decay', type=float, default=999999,
                     help='Learning rate decay type')
 parser.add_argument('--gamma', type=float, default=0.5,
                     help='Learning rate decay factor for step decay')
+parser.add_argument('--step_size', type=int, default=20,
+                    help='Learning rate step decay')
+parser.add_argument('--norm', type=str2bool, default=False,
+                    help='Use Normolize in transforms')
 
 # trining setting
 parser.add_argument('--save_every', type=int, default=1,
@@ -33,6 +37,9 @@ parser.add_argument("--batch_size", type=int, default=4,
                     help="size of each image batch")
 parser.add_argument("--print_freq", type=int, default=100,
                     help="frequence of print batch metric")
+parser.add_argument("--split_val", type=int,
+                    help="Split last training data into validation set")
+
 
 # log setting
 parser.add_argument('--save_dir', type=str, default='save_dir',
@@ -48,9 +55,10 @@ parser.add_argument('--logger_name', type=str, default='maskrcnn',
 parser.add_argument('--test', type=str2bool, default=False,
                     help='Test mode')
 parser.add_argument("--checkpoint", type=str,
-                    default="checkpoints/maskrcnn/20.pth",
                     help="load checkpoint model")
 parser.add_argument("--outjson", type=str, default="new.json",
                     help="path to store the result")
+parser.add_argument("--mask_threshold", type=float, default=0.5,
+                    help="the threshold of mask")
 
 args = parser.parse_args()
